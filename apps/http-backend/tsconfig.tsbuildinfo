@@ -1,0 +1,1 @@
+{"root":["./src/db.ts","./src/index.ts","./src/tsconfig.ts","./src/controllers/teacher.c.ts","./src/models/attendance.m.ts","./src/models/class.m.ts","./src/models/student.m.ts","./src/models/teacher.m.ts","./src/routes/teacher.ts"],"version":"5.9.2"}
