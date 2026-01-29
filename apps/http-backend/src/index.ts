@@ -3,6 +3,7 @@ import cors from "cors"
 import cookieParser from "cookie-parser"
 import { PORT } from "./tsconfig"
 import teacherrouter from "./routes/teacher"
+import classrouter from "./routes/class"
 import db from "./db"
 
 
@@ -14,6 +15,7 @@ app.use(express.urlencoded({extended:true}))
 app.use(cookieParser())
 
 app.use("/api/v1/teacher/",teacherrouter)
+app.use("/api/v1/class/",classrouter)
 
 
 db();
