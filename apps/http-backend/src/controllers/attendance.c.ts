@@ -5,7 +5,8 @@ import { Student } from "../models/student.m.js";
 
 
 const markattendance=async (req:Request,res:Response)=>{
-    const {student_name,class_name,date,status}=req.body;
+    const {class_name,date}=req.body;
+    const file=req.file;
     //@ts-ignore
     const teacher_id=req.teacherId
     try {
@@ -18,40 +19,31 @@ const markattendance=async (req:Request,res:Response)=>{
             })
         }
         const class_id=class_exist._id;
+
+        const students=await Student.find({class:class_id}).select("reg_no faceembedding")
         
-        const student_exist=await Student.findOne({stu_name:student_name,class:class_id})
-        const attendancealreadymarked=await Attendance.findOne({date:date,studentId:student_exist?._id})
-        if(attendancealreadymarked){
-            return res.status(403).json({
-                message:"Student is already marked"
-            })
-        }
-        if(!student_exist){
-            return res.status(403).json({
-                message:"Student do not exist",
-                success:false,
-            })
-        }
         
-        const attendance=await Attendance.create({
-            student:student_exist._id,
-            class:class_id,
-            date:date,
-            status:status
-        })
         
-        if(!attendance){
-            return res.status(403).json({
-                message:"Error in Marking attendance",
-                success:false
-            })
-        }
         
-        res.json({
-            message:"Attendance Marked",
-            success:true,
-            Attendance:attendance
-        })
+        // const attendance=await Attendance.create({
+        //     student:student_exist._id,
+        //     class:class_id,
+        //     date:date,
+        //     status:status
+        // })
+        
+        // if(!attendance){
+        //     return res.status(403).json({
+        //         message:"Error in Marking attendance",
+        //         success:false
+        //     })
+        // }
+        
+        // res.json({
+        //     message:"Attendance Marked",
+        //     success:true,
+        //     Attendance:attendance
+        // })
     } catch (error) {
         
     }
