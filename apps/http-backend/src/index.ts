@@ -6,6 +6,7 @@ import teacherrouter from "./routes/teacher"
 import classrouter from "./routes/class"
 import db from "./db"
 import studentrouter from "./routes/student"
+import attendancerouter from "./routes/attendance"
 
 
 
@@ -18,6 +19,7 @@ app.use(cookieParser())
 app.use("/api/v1/teacher/",teacherrouter)
 app.use("/api/v1/class/",classrouter)
 app.use("/api/v1/student/",studentrouter)
+app.use("/api/v1/attendance/",attendancerouter)
 
 db();
 

@@ -149,7 +149,7 @@ const attendancehistory=async (req:Request,res:Response)=>{
         res.json({
             message:"Attendance History Found",
             success:true,
-            Student_Name:student_exist.Student_name,
+            Student_Name:student_exist.stu_name,
             Attendance_History:attendancehistory
         })
     } catch (error) {
