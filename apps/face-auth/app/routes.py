@@ -5,10 +5,12 @@ router=APIRouter()
 
 @router.post("/extract_embedding")
 async def extract(file:UploadFile=File(...)):
-    return extract_embedding(file)
+    embedding=await extract_embedding(file)
+    return embedding
 
 
 @router.post("/recognize")
 async def recog(file:UploadFile=File(...)):
-    return recog_face(file)
+    recogface=await recog_face(file)
+    return recogface
 

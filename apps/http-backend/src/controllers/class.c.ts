@@ -25,7 +25,7 @@ console.log(existclass);
     const createdclass = await Class.create({
             class_name:classname,
             //@ts-ignore
-            teacherId:req.teacherId,
+            teacher:req.teacherId,
         })
 console.log(createdclass);
 
