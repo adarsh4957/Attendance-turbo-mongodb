@@ -2,11 +2,12 @@ import { Attendance } from "../models/attendance.m.js";
 import type { Request,Response } from "express";
 import { Class } from "../models/class.m.js";
 import { Student } from "../models/student.m.js";
+import  FormData from "form-data";
+import axios, { head } from "axios";
 
 
 const markattendance=async (req:Request,res:Response)=>{
     const {class_name,date}=req.body;
-    const file=req.file;
     //@ts-ignore
     const teacher_id=req.teacherId
     try {
@@ -19,10 +20,32 @@ const markattendance=async (req:Request,res:Response)=>{
             })
         }
         const class_id=class_exist._id;
+        if(!req.file){
+            return res.status(400).json({
+                message:"No file uploaded",
+                success:false
+            })
+        }
+        const students=await Student.find({class:class_id}).select("faceembedding")
+        
+        const  form= new FormData();
+        form.append("file",req.file.buffer,
+            {
+                filename:req.file.originalname,
+                contentType:req.file.mimetype
+            }
+        )
 
-        const students=await Student.find({class:class_id}).select("reg_no faceembedding")
+        const response=await axios.post(
+            "http://127.0.0.1:8000/recognize",
+            form,
+            {
+                headers:form.getHeaders(),
+            }
+        )
         
-        
+        const recognizedembeddings:number[][]=response.data.embeddings;
+
         
         
         // const attendance=await Attendance.create({
