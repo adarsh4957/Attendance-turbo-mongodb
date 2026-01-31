@@ -9,11 +9,14 @@ import euclideandist from "../euclidean.js";
 
 const markattendance=async (req:Request,res:Response)=>{
     const {class_name,date}=req.body;
+    
     //@ts-ignore
     const teacher_id=req.teacherId
     try {
         
         const class_exist=await Class.findOne({class_name:class_name})
+        
+        
         if(!class_exist){
             return res.status(403).json({
                 message:"Class Do not exists",
@@ -46,7 +49,7 @@ const markattendance=async (req:Request,res:Response)=>{
         )
         
         const recognizedembeddings:number[][]=response.data.embeddings;
-
+        
         const present=new Set<String>();
         const threshold=0.5;
 
