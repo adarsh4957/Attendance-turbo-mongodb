@@ -7,7 +7,8 @@
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "check-types": "turbo run check-types",
-    "dev:ai": "cd apps/face-auth && venv\\Scripts\\uvicorn app.main:app --reload --port 8000"
+    "dev:ai": "cd apps/face-auth && venv\\Scripts\\uvicorn app.main:app --reload --port 8000",
+    "devboth":"pnpm run dev && pnpm run dev:ai"
 
   },
   "devDependencies": {

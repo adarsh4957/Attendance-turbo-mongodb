@@ -89,12 +89,7 @@ const markattendance=async (req:Request,res:Response)=>{
 
         }
         const attendance=await Attendance.insertMany(attendancerecords);
-        // const attendance=await Attendance.create({
-        //     student:student_exist._id,
-        //     class:class_id,
-        //     date:date,
-        //     status:status
-        // })
+        
         
         if(!attendance){
             return res.status(403).json({
