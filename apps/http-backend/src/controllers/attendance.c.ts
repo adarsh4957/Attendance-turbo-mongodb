@@ -4,6 +4,7 @@ import { Class } from "../models/class.m.js";
 import { Student } from "../models/student.m.js";
 import  FormData from "form-data";
 import axios, { head } from "axios";
+import euclideandist from "../euclidean.js";
 
 
 const markattendance=async (req:Request,res:Response)=>{
@@ -46,8 +47,45 @@ const markattendance=async (req:Request,res:Response)=>{
         
         const recognizedembeddings:number[][]=response.data.embeddings;
 
+        const present=new Set<String>();
+        const threshold=0.5;
+
+        for (const detected of recognizedembeddings){
+            let bestmatch:string | null =null;
+            let bestdistance=Infinity;
+
+            for (const student of students){
+                const dist=euclideandist(detected,student.faceembedding);
+
+                if(dist<bestdistance){
+                bestdistance=dist;
+                bestmatch=student._id.toString()
+                }
+            }
+
+
+                if(bestdistance<threshold && bestmatch){
+                    present.add(bestmatch)
+                }
+            }
         
-        
+        const attendancerecords=[];
+
+
+        for (const student of students){
+
+            const status=present.has(student._id.toString()) ? "present" :"absent";
+
+            attendancerecords.push({
+                student:student._id,
+                class:class_id,
+                date:new Date(date),
+                status:status
+            })
+
+
+        }
+        const attendance=await Attendance.insertMany(attendancerecords);
         // const attendance=await Attendance.create({
         //     student:student_exist._id,
         //     class:class_id,
@@ -55,20 +93,24 @@ const markattendance=async (req:Request,res:Response)=>{
         //     status:status
         // })
         
-        // if(!attendance){
-        //     return res.status(403).json({
-        //         message:"Error in Marking attendance",
-        //         success:false
-        //     })
-        // }
+        if(!attendance){
+            return res.status(403).json({
+                message:"Error in Marking attendance",
+                success:false
+            })
+        }
         
-        // res.json({
-        //     message:"Attendance Marked",
-        //     success:true,
-        //     Attendance:attendance
-        // })
+        res.json({
+            message:"Attendance Marked",
+            success:true,
+            present_count:present.size,
+            totalstudents:students.length
+        })
     } catch (error) {
-        
+        res.status(404).json({
+            message:"Mark attendance burst",
+            success:false
+        })
     }
 }
 
