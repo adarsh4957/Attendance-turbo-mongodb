@@ -1,135 +1,79 @@
-# Turborepo starter
+# Attendance Turborepo – Installation & Setup Guide
 
-This Turborepo starter is maintained by the Turborepo core team.
+This repository is a **monorepo (Turborepo)** that contains **two backend services** working together:
 
-## Using this example
+1. **Node.js HTTP Backend** – business logic, database, attendance flow  
+2. **Python FastAPI Face-Auth Service** – face detection & embedding extraction  
 
-Run the following command:
+Both services are required for the system to work correctly.
 
-```sh
-npx create-turbo@latest
-```
+---
 
-## What's inside?
+## 🧠 Architecture Overview
 
-This Turborepo includes the following packages/apps:
 
-### Apps and Packages
+- Node.js handles authentication, classes, students, attendance
+- Python handles face recognition only
+- Services communicate via HTTP (Axios → FastAPI)
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+---
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+## 📦 Prerequisites
 
-### Utilities
+Make sure the following are installed **before cloning**:
 
-This Turborepo has some additional tools already setup for you:
+### System Requirements
+- **Node.js ≥ 18**
+- **pnpm ≥ 9**
+- **Python 3.10.x (MANDATORY)**
+- **Git**
 
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
+> ⚠️ Python 3.11+ and 3.13 are **NOT supported** by `dlib`
 
-### Build
+---
 
-To build all apps and packages, run the following command:
+## 📥 Clone the Repository
 
-```
-cd my-turborepo
+```bash
+git clone https://github.com/<your-username>/attendance-turborepo.git
+cd attendance-turborepo
 
-# With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build
+## Repository Structure
 
-# Without [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build
-yarn dlx turbo build
-pnpm exec turbo build
-```
+attendance-turborepo/
+├── apps/
+│   ├── http/          # Node.js backend
+│   └── face-auth/     # Python FastAPI service
+├── packages/          # Shared packages (if any)
+├── turbo.json
+├── package.json
+└── pnpm-lock.yaml
 
-You can build a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
+Install Node Dependencies (Root Level)
+  pnpm install
+  To run node server
+  pnpm run dev
 
-```
-# With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build --filter=docs
+PART 2: Python Face-Auth Service Setup (apps/face-auth)
 
-# Without [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build --filter=docs
-yarn exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-```
+  Navigate to Python Service
+    cd apps/face-auth
 
-### Develop
+  Create Virtual Environment
+    python -m venv venv
 
-To develop all apps and packages, run the following command:
+  Activate it:
 
-```
-cd my-turborepo
+    Windows
+      venv\Scripts\activate
+    Linux / macOS
+      source venv/bin/activate
 
-# With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev
+  Install Python Dependencies
+    pip install -r requirements.txt
 
-# Without [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev
-yarn exec turbo dev
-pnpm exec turbo dev
-```
 
-You can develop a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
+⚠️ First install may take time because dlib compiles native code.
 
-```
-# With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev --filter=web
-
-# Without [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev --filter=web
-yarn exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
-```
-
-### Remote Caching
-
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
-
-Turborepo can use a technique known as [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended)
-turbo login
-
-# Without [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation), use your package manager
-npx turbo login
-yarn exec turbo login
-pnpm exec turbo login
-```
-
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-```
-# With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended)
-turbo link
-
-# Without [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation), use your package manager
-npx turbo link
-yarn exec turbo link
-pnpm exec turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turborepo.dev/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.dev/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.dev/docs/reference/configuration)
-- [CLI Usage](https://turborepo.dev/docs/reference/command-line-reference)
+  Run FastAPI Server
+    uvicorn app.main:app --reload --port 8000
