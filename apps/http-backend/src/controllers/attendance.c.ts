@@ -7,111 +7,124 @@ import axios, { head } from "axios";
 import euclideandist from "../euclidean.js";
 
 
-const markattendance=async (req:Request,res:Response)=>{
-    const {class_name,date}=req.body;
-    
-    //@ts-ignore
-    const teacher_id=req.teacherId
-    try {
-        
-        const class_exist=await Class.findOne({class_name:class_name})
-        
-        
-        if(!class_exist){
-            return res.status(403).json({
-                message:"Class Do not exists",
-                success:false
-            })
-        }
-        const class_id=class_exist._id;
-        if(!req.file){
-            return res.status(400).json({
-                message:"No file uploaded",
-                success:false
-            })
-        }
-        const students=await Student.find({class:class_id}).select("faceembedding")
-        
-        const  form= new FormData();
-        form.append("file",req.file.buffer,
-            {
-                filename:req.file.originalname,
-                contentType:req.file.mimetype
-            }
-        )
+const markattendance = async (req: Request, res: Response) => {
+    const { class_name, date } = req.body;
 
-        const response=await axios.post(
+    //@ts-ignore
+    const teacher_id = req.teacherId
+
+    try {
+
+        const class_exist = await Class.findOne({ class_name: class_name })
+
+        if (!class_exist) {
+            return res.status(403).json({
+                message: "Class Do not exists",
+                success: false
+            })
+        }
+
+        const class_id = class_exist._id;
+
+        if (!req.file) {
+            return res.status(400).json({
+                message: "No file uploaded",
+                success: false
+            })
+        }
+
+        const students = await Student.find({ class: class_id })
+            .select("_id faceembedding")
+            .lean()
+
+        const form = new FormData();
+        form.append("file", req.file.buffer, {
+            filename: req.file.originalname,
+            contentType: req.file.mimetype
+        })
+
+        const response = await axios.post(
             "http://127.0.0.1:8000/recognize",
             form,
             {
-                headers:form.getHeaders(),
+                headers: form.getHeaders(),
             }
         )
-        
-        const recognizedembeddings:number[][]=response.data.embeddings;
-        
-        const present=new Set<String>();
-        const threshold=0.5;
 
-        for (const detected of recognizedembeddings){
-            let bestmatch:string | null =null;
-            let bestdistance=Infinity;
+        const recognizedembeddings: number[][] = response.data.embeddings;
 
-            for (const student of students){
-                const dist=euclideandist(detected,student.faceembedding);
+        const present = new Set<string>();
+        const threshold = 0.5;
 
-                if(dist<bestdistance){
-                bestdistance=dist;
-                bestmatch=student._id.toString()
+        // ✅ Precompute student embeddings for faster access
+        const studentEmbeddings = students.map(s => ({
+            id: s._id.toString(),
+            embedding: s.faceembedding
+        }))
+
+        // ✅ Optimized matching loop
+        for (const detected of recognizedembeddings) {
+
+            let bestmatch: string | null = null;
+            let bestdistance = Infinity;
+
+            for (const student of studentEmbeddings) {
+
+                const dist = euclideandist(detected, student.embedding)
+
+                if (dist < bestdistance) {
+                    bestdistance = dist
+                    bestmatch = student.id
                 }
+
+                // early stop if very good match
+                if (bestdistance < 0.35) break
             }
 
-
-                if(bestdistance<threshold && bestmatch){
-                    present.add(bestmatch)
-                }
+            if (bestdistance < threshold && bestmatch) {
+                present.add(bestmatch)
             }
-        
-        const attendancerecords=[];
+        }
 
+        const attendancerecords = [];
 
-        for (const student of students){
+        for (const student of students) {
 
-            const status=present.has(student._id.toString()) ? "present" :"absent";
+            const status = present.has(student._id.toString())
+                ? "present"
+                : "absent";
 
             attendancerecords.push({
-                student:student._id,
-                class:class_id,
-                date:new Date(date),
-                status:status
+                student: student._id,
+                class: class_id,
+                date: new Date(date),
+                status: status
             })
-
-
         }
-        const attendance=await Attendance.insertMany(attendancerecords);
-        
-        
-        if(!attendance){
+
+        const attendance = await Attendance.insertMany(attendancerecords);
+
+        if (!attendance) {
             return res.status(403).json({
-                message:"Error in Marking attendance",
-                success:false
+                message: "Error in Marking attendance",
+                success: false
             })
         }
-        
+
         res.json({
-            message:"Attendance Marked",
-            success:true,
-            present_count:present.size,
-            totalstudents:students.length
+            message: "Attendance Marked",
+            success: true,
+            present_count: present.size,
+            totalstudents: students.length
         })
+
     } catch (error) {
         res.status(404).json({
-            message:"Mark attendance burst",
-            success:false
+            message: "Mark attendance burst",
+            success: false
         })
     }
 }
-
 const updateattendance=async (req:Request,res:Response)=>{
     const {status}=req.body;
     const attendance_id=req.params.id;
